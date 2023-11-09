@@ -20,20 +20,38 @@ router.get('/genre/:tag', async (req, res) => { // All shows of specific genre
     res.json(shows)
 })
 
-router.put('/:id', async (req, res) => { // Updates rating of a show
-    const params = req.params
-    const show = await Show.findByPk(params.id)
-    await show.update(req.body)
-    const shows = await Show.findAll()
-    res.json(shows)
+router.put('/:id', [check("rating").trim().not().isEmpty()], async (req, res) => { // Updates rating of a show
+    const errors = validationResult(req)
+
+    if(errors.isEmpty()) {
+        // No Errors
+        const params = req.params
+        const show = await Show.findByPk(params.id)
+        await show.update(req.body)
+        const shows = await Show.findAll()
+        res.json(shows)
+    } else {
+        // Errors
+        res.json({"error": errors.array()})
+    }
+
 })
 
-router.put('/:id/update', async (req, res) => { // Updates status of show stored with key of available
-    const params = req.params
-    const show = await Show.findByPk(params.id)
-    await show.update(req.body)
-    const shows = await Show.findAll()
-    res.json(shows)
+router.put('/:id/update', [check("available").trim().not().isEmpty().isLength({min: 5, max: 25})], async (req, res) => { // Updates status of show stored with key of available
+    const errors = validationResult(req)
+
+    if(errors.isEmpty()) {
+        // No Errors
+        const params = req.params
+        const show = await Show.findByPk(params.id)
+        await show.update(req.body)
+        const shows = await Show.findAll()
+        res.json(shows)
+    } else {
+        // Errors
+        res.json(errors.array())
+    }
+
 })
 
 router.delete('/:id', async (req, res) => {
