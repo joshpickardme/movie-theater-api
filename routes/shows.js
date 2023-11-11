@@ -14,6 +14,28 @@ router.get('/:id', async (req, res) => { // One Show
     res.json(show)
 })
 
+router.post('/', [
+    //{"title": "hggg", "genre": "o", "rating": "bad", "available": "yes"}
+    check("title").trim().not().isEmpty(),
+    check("genre").trim().not().isEmpty(),
+    check("rating").trim().not().isEmpty(),
+    check("available").trim().not().isEmpty()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if(errors.isEmpty()) {
+        // No Errors
+        const createShow = await Show.create(req.body)
+        const allShows = await Show.findAll()
+        res.json(allShows)
+    } else {
+        // Errors
+        res.json(errors.array())
+        
+    }
+
+
+})
+
 router.get('/genre/:tag', async (req, res) => { // All shows of specific genre
     const params = req.params
     const shows = await Show.findAll({where: {genre: params.tag}})
@@ -37,7 +59,7 @@ router.put('/:id', [check("rating").trim().not().isEmpty()], async (req, res) =>
 
 })
 
-router.put('/:id/update', [check("available").trim().not().isEmpty().isLength({min: 5, max: 25})], async (req, res) => { // Updates status of show stored with key of available
+router.put('/:id/update', [check("available").trim().not().isEmpty().isBoolean()], async (req, res) => { // Updates status of show stored with key of available
     const errors = validationResult(req)
 
     if(errors.isEmpty()) {
